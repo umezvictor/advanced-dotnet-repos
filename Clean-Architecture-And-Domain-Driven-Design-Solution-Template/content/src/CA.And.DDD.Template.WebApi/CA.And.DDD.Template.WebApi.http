@@ -1,0 +1,109 @@
+@apiUrl = https://localhost:7118/api
+@customerId = ''
+@orderId = ''
+@customerEmail = mikjan9@email.com
+@token = ''
+
+### Create a customer
+# @name createCustomerEndpoint
+POST {{apiUrl}}/customers
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullName": "Mikolaj Jankowski",
+  "birthDate": "1990-01-01",
+  "email": "{{customerEmail}}",
+  "street": "Wall Street",
+  "houseNumber": "10A",
+  "flatNumber": "1",
+  "country": "PL",
+  "postalCode": "69-100"
+}
+###
+@customerId = {{createUserEndpoint.response.body.id}}
+
+### Create an order
+# @name createOrderEndpoint
+POST {{apiUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "street": "Fifth Avenue",
+  "postalCode": "10037",
+  "customerId": "{{customerId}}",
+  "products": [
+    {
+      "productId": 1,
+      "productName": "Bike",
+      "price": 1450,
+      "currency": "USD",
+      "quantity": 3
+    },
+    {
+      "productId": 2,
+      "productName": "Skateboard",
+      "price": 700,
+      "currency": "USD",
+      "quantity": 4
+    }
+  ]
+}
+###
+@orderId = {{createOrderEndpoint.response.body.orderId}}
+
+### Get customer
+GET {{apiUrl}}/customers/{{customerId}}
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{token}}
+
+
+### Get order
+GET {{apiUrl}}/orders/{{orderId}}
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{token}}
+
+### Browse orders
+POST {{apiUrl}}/orders/browse-orders
+Content-Type: application/json; charset=utf-8
+Authorization: Bearer {{token}}
+
+{
+  "customerId": "{{customerId}}",
+  "paginationParameters": {
+    "pageSize": 10,
+    "pageNumber": 1,
+    "orderColumn": "totalAmount"
+  }
+}
+
+### Change e-mail
+POST {{apiUrl}}/customers/change-email
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "oldEmail": "{{customerEmail}}",
+  "newEmail": "somone@yourdomain.com"
+}
+
+### Verify e-mail
+POST {{apiUrl}}/customers/verify-email
+Content-Type: application/json
+
+{
+  "email": "{{customerEmail}}"
+}
+
+### Login
+# @name authenticationEndpoint
+POST {{apiUrl}}/user/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+###
+@token = {{authenticationEndpoint.response.body.accessToken}}

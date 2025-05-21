@@ -1,0 +1,31 @@
+{
+    "$schema": "http://json.schemastore.org/template",
+    "author": "amantinband",
+    "classifications": [
+        "Clean Architecture",
+        "ASP.NET",
+        "ASP.NET Core",
+        "Web API",
+        "Project Template"
+    ],
+    "name": "Clean Architecture Template",
+    "shortName": "clean-arch",
+    "tags": {
+        "language": "C#",
+        "type": "project"
+    },
+    "identity": "Amantinband.CleanArchitecture.Template",
+    "description": ".NET 8 Clean Architecture Template",
+    "sourceName": "CleanArchitecture",
+    "sources": [
+        {
+            "source": "./",
+            "target": "./",
+            "exclude": [
+                ".git/**",
+                ".gitignore",
+                ".template.config/**/*"
+            ]
+        }
+    ]
+}

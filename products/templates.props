@@ -1,0 +1,48 @@
+<Project>
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <language>en-US</language>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+    <Authors>Duende Software</Authors>
+    <Company>Duende Software</Company>
+    <Copyright>Duende Software</Copyright>
+
+    <IsTestProject>false</IsTestProject>
+    <IsPackable>true</IsPackable>
+
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageIcon>icon.png</PackageIcon>
+
+    <!--NU5128 doesn't apply to template packages.
+    https://learn.microsoft.com/en-us/dotnet/core/tutorials/cli-templates-create-template-package#description-of-the-project-xml-->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+
+    <!--Minver-->
+    <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
+    <MinVerBuildMetadata>build.$(BUILD_NUMBER)</MinVerBuildMetadata>
+    <MinVerAutoIncrement>patch</MinVerAutoIncrement>
+
+    <!--NuGet-->
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/duendesoftware/products</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/duendesoftware/products/releases</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../icon.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="$(PackageReadmePath)" Pack="true" PackagePath="" />
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

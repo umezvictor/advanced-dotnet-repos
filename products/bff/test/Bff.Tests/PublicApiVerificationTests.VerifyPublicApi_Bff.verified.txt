@@ -1,0 +1,361 @@
+﻿namespace Duende.Bff.AccessTokenManagement
+{
+    public abstract class AccessTokenResult
+    {
+        protected AccessTokenResult() { }
+    }
+    [System.Runtime.CompilerServices.RequiredMember]
+    public class AccessTokenRetrievalContext
+    {
+        [System.Obsolete(("Constructors of types with required members are not supported in this version of " +
+            "your compiler."), true)]
+        [System.Runtime.CompilerServices.CompilerFeatureRequired("RequiredMembers")]
+        public AccessTokenRetrievalContext() { }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public System.Uri ApiAddress { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Microsoft.AspNetCore.Http.HttpContext HttpContext { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Microsoft.AspNetCore.Http.PathString LocalPath { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.Bff.Configuration.BffRemoteApiEndpointMetadata Metadata { get; set; }
+        [System.Runtime.CompilerServices.RequiredMember]
+        public Duende.AccessTokenManagement.OpenIdConnect.UserTokenRequestParameters? UserTokenRequestParameters { get; set; }
+    }
+    public class AccessTokenRetrievalError : Duende.Bff.AccessTokenManagement.AccessTokenResult
+    {
+        public AccessTokenRetrievalError(string error) { }
+        public string Error { get; }
+    }
+    public class BearerTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult
+    {
+        public BearerTokenResult(string accessToken) { }
+        public string AccessToken { get; }
+    }
+    public class DPoPTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult
+    {
+        public DPoPTokenResult(string accessToken, string dpopJWK) { }
+        public string AccessToken { get; }
+        public string DPoPJsonWebKey { get; }
+    }
+    public interface IAccessTokenRetriever
+    {
+        System.Threading.Tasks.Task<Duende.Bff.AccessTokenManagement.AccessTokenResult> GetAccessToken(Duende.Bff.AccessTokenManagement.AccessTokenRetrievalContext context);
+    }
+    public class MissingDPopTokenError : Duende.Bff.AccessTokenManagement.AccessTokenRetrievalError
+    {
+        public MissingDPopTokenError(string error) { }
+    }
+    public class NoAccessTokenResult : Duende.Bff.AccessTokenManagement.AccessTokenResult
+    {
+        public NoAccessTokenResult() { }
+    }
+    public class NoAccessTokenReturnedError : Duende.Bff.AccessTokenManagement.AccessTokenRetrievalError
+    {
+        public NoAccessTokenReturnedError(string error) { }
+    }
+    public enum TokenType
+    {
+        User = 0,
+        Client = 1,
+        UserOrClient = 2,
+    }
+    public class UnexpectedAccessTokenError : Duende.Bff.AccessTokenManagement.AccessTokenRetrievalError
+    {
+        public UnexpectedAccessTokenError(string error) { }
+    }
+}
+namespace Duende.Bff
+{
+    public static class AuthenticationPropertiesExtensions
+    {
+        public static bool IsSilentLogin(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props) { }
+        public static bool TryGetPrompt(this Microsoft.AspNetCore.Authentication.AuthenticationProperties props, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? prompt) { }
+    }
+    public static class AuthenticationTicketExtensions
+    {
+        public static Microsoft.AspNetCore.Authentication.AuthenticationTicket? Deserialize(this Duende.Bff.SessionManagement.SessionStore.UserSession session, Microsoft.AspNetCore.DataProtection.IDataProtector protector, Microsoft.Extensions.Logging.ILogger logger) { }
+        public static System.DateTime? GetExpiration(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static System.DateTime GetIssued(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static string? GetSessionId(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static string GetSubjectId(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket) { }
+        public static string Serialize(this Microsoft.AspNetCore.Authentication.AuthenticationTicket ticket, Microsoft.AspNetCore.DataProtection.IDataProtector protector) { }
+        public class Envelope
+        {
+            public Envelope() { }
+            public string Payload { get; set; }
+            public int Version { get; set; }
+        }
+    }
+    public static class BffApplicationBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseBff(this Microsoft.AspNetCore.Builder.IApplicationBuilder app) { }
+    }
+    public class BffBuilder
+    {
+        public BffBuilder(Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
+        public Duende.Bff.BffBuilder AddServerSideSessions() { }
+        public Duende.Bff.BffBuilder AddServerSideSessions<T>()
+            where T :  class, Duende.Bff.SessionManagement.SessionStore.IUserSessionStore { }
+    }
+    public static class BffEndpointRouteBuilderExtensions
+    {
+        public static void MapBffDiagnosticsEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementBackchannelEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementEndpoints(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementLoginEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementLogoutEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
+            "w handled by passing the prompt=none parameter to the login endpoint."))]
+        public static void MapBffManagementSilentLoginEndpoints(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+        public static void MapBffManagementUserEndpoint(this Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints) { }
+    }
+    public static class BffRemoteApiEndpointExtensions
+    {
+        public static TBuilder RequireAccessToken<TBuilder>(this TBuilder builder, Duende.Bff.AccessTokenManagement.TokenType type = 0)
+            where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder WithAccessTokenRetriever<TRetriever>(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder)
+            where TRetriever : Duende.Bff.AccessTokenManagement.IAccessTokenRetriever { }
+        public static TBuilder WithOptionalUserAccessToken<TBuilder>(this TBuilder builder)
+            where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
+        public static TBuilder WithUserAccessTokenParameter<TBuilder>(this TBuilder builder, Duende.Bff.Configuration.BffUserAccessTokenParameters bffUserAccessTokenParameters)
+            where TBuilder : Microsoft.AspNetCore.Builder.IEndpointConventionBuilder { }
+    }
+    public static class BffServiceCollectionExtensions
+    {
+        public static Duende.Bff.BffBuilder AddBff(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Duende.Bff.Configuration.BffOptions>? configureAction = null) { }
+    }
+    public static class Constants
+    {
+        public static class BffFlags
+        {
+            public const string Prompt = "bff-prompt";
+        }
+        public static class ClaimTypes
+        {
+            public const string LogoutUrl = "bff:logout_url";
+            public const string SessionExpiresIn = "bff:session_expires_in";
+            public const string SessionState = "bff:session_state";
+        }
+        public static class ManagementEndpoints
+        {
+            public const string BackChannelLogout = "/backchannel";
+            public const string Diagnostics = "/diagnostics";
+            public const string Login = "/login";
+            public const string Logout = "/logout";
+            [System.Obsolete("use /login?prompt=create")]
+            public const string SilentLogin = "/silent-login";
+            public const string SilentLoginCallback = "/silent-login-callback";
+            public const string User = "/user";
+        }
+        public static class RequestParameters
+        {
+            public const string Prompt = "prompt";
+            public const string ReturnUrl = "returnUrl";
+            public const string SlideCookie = "slide";
+        }
+        public static class Yarp
+        {
+            public const string AntiforgeryCheckMetadata = "Duende.Bff.Yarp.AntiforgeryCheck";
+            public const string OptionalUserTokenMetadata = "Duende.Bff.Yarp.OptionalUserToken";
+            public const string TokenTypeMetadata = "Duende.Bff.Yarp.TokenType";
+        }
+    }
+    public static class EndpointConventionBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder AsBffApiEndpoint(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder SkipAntiforgery(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
+        public static Microsoft.AspNetCore.Builder.IEndpointConventionBuilder SkipResponseHandling(this Microsoft.AspNetCore.Builder.IEndpointConventionBuilder builder) { }
+    }
+}
+namespace Duende.Bff.Configuration
+{
+    public enum AnonymousSessionResponse
+    {
+        Response401 = 0,
+        Response200 = 1,
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public class BffApiAttribute : System.Attribute, Duende.Bff.Endpoints.IBffApiMetadata
+    {
+        public BffApiAttribute() { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public class BffApiSkipAntiforgeryAttribute : System.Attribute, Duende.Bff.Endpoints.IBffApiSkipAntiforgery
+    {
+        public BffApiSkipAntiforgeryAttribute() { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method)]
+    public class BffApiSkipResponseHandlingAttribute : System.Attribute, Duende.Bff.Endpoints.IBffApiSkipResponseHandling
+    {
+        public BffApiSkipResponseHandlingAttribute() { }
+    }
+    public class BffOptions
+    {
+        public BffOptions() { }
+        public Duende.Bff.Configuration.AnonymousSessionResponse AnonymousSessionResponse { get; set; }
+        public string AntiForgeryHeaderName { get; set; }
+        public string AntiForgeryHeaderValue { get; set; }
+        public Microsoft.AspNetCore.Http.PathString BackChannelLogoutPath { get; }
+        public bool BackchannelLogoutAllUserSessions { get; set; }
+        public string? DPoPJsonWebKey { get; set; }
+        public System.Collections.Generic.ICollection<string> DiagnosticsEnvironments { get; set; }
+        public Microsoft.AspNetCore.Http.PathString DiagnosticsPath { get; }
+        public Duende.Bff.Configuration.DisableAntiForgeryCheck DisableAntiForgeryCheck { get; set; }
+        public bool EnableSessionCleanup { get; set; }
+        public bool EnforceBffMiddleware { get; set; }
+        public string? LicenseKey { get; set; }
+        public Microsoft.AspNetCore.Http.PathString LoginPath { get; }
+        public Microsoft.AspNetCore.Http.PathString LogoutPath { get; }
+        public Microsoft.AspNetCore.Http.PathString ManagementBasePath { get; set; }
+        public bool RemoveSessionAfterRefreshTokenExpiration { get; set; }
+        public bool RequireLogoutSessionId { get; set; }
+        public bool RevokeRefreshTokenOnLogout { get; set; }
+        public System.TimeSpan SessionCleanupInterval { get; set; }
+        public Microsoft.AspNetCore.Http.PathString SilentLoginCallbackPath { get; }
+        [System.Obsolete(("The silent login endpoint will be removed in a future version. Silent login is no" +
+            "w handled by passing the prompt=none parameter to the login endpoint."))]
+        public Microsoft.AspNetCore.Http.PathString SilentLoginPath { get; }
+        public Microsoft.AspNetCore.Http.PathString UserPath { get; }
+    }
+    public class BffRemoteApiEndpointMetadata : Duende.Bff.Endpoints.IBffApiMetadata
+    {
+        public Duende.Bff.AccessTokenManagement.TokenType? RequiredTokenType;
+        public BffRemoteApiEndpointMetadata() { }
+        public System.Type AccessTokenRetriever { get; set; }
+        public Duende.Bff.Configuration.BffUserAccessTokenParameters? BffUserAccessTokenParameters { get; set; }
+        public bool OptionalUserToken { get; set; }
+    }
+    public class BffUserAccessTokenParameters
+    {
+        public BffUserAccessTokenParameters(string? signInScheme = null, string? challengeScheme = null, bool forceRenewal = false, string? resource = null) { }
+        public Duende.AccessTokenManagement.OpenIdConnect.UserTokenRequestParameters ToUserAccessTokenRequestParameters() { }
+    }
+    public delegate bool DisableAntiForgeryCheck(Microsoft.AspNetCore.Http.HttpContext context);
+}
+namespace Duende.Bff.Endpoints
+{
+    public interface IBackchannelLogoutService : Duende.Bff.Endpoints.IBffEndpointService { }
+    public interface IBffApiMetadata { }
+    public interface IBffApiSkipAntiforgery { }
+    public interface IBffApiSkipResponseHandling { }
+    public interface IBffEndpointService
+    {
+        System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context);
+    }
+    public interface IDiagnosticsService : Duende.Bff.Endpoints.IBffEndpointService { }
+    public interface ILoginService : Duende.Bff.Endpoints.IBffEndpointService { }
+    public interface ILogoutService : Duende.Bff.Endpoints.IBffEndpointService { }
+    public interface IReturnUrlValidator
+    {
+        System.Threading.Tasks.Task<bool> IsValidAsync(string returnUrl);
+    }
+    public interface IUserService : Duende.Bff.Endpoints.IBffEndpointService { }
+}
+namespace Duende.Bff.Endpoints.SilentLogin
+{
+    public class BffOpenIdConnectEvents : Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectEvents
+    {
+        protected readonly Microsoft.Extensions.Logging.ILogger<Duende.Bff.Endpoints.SilentLogin.BffOpenIdConnectEvents> Logger;
+        public BffOpenIdConnectEvents(Microsoft.Extensions.Options.IOptions<Duende.Bff.Configuration.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Endpoints.SilentLogin.BffOpenIdConnectEvents> logger) { }
+        public override System.Threading.Tasks.Task AuthenticationFailed(Microsoft.AspNetCore.Authentication.OpenIdConnect.AuthenticationFailedContext context) { }
+        public override System.Threading.Tasks.Task MessageReceived(Microsoft.AspNetCore.Authentication.OpenIdConnect.MessageReceivedContext context) { }
+        public virtual System.Threading.Tasks.Task<bool> ProcessAuthenticationFailedAsync(Microsoft.AspNetCore.Authentication.OpenIdConnect.AuthenticationFailedContext context) { }
+        public virtual System.Threading.Tasks.Task<bool> ProcessMessageReceivedAsync(Microsoft.AspNetCore.Authentication.OpenIdConnect.MessageReceivedContext context) { }
+        public virtual System.Threading.Tasks.Task<bool> ProcessRedirectToIdentityProviderAsync(Microsoft.AspNetCore.Authentication.OpenIdConnect.RedirectContext context) { }
+        public override System.Threading.Tasks.Task RedirectToIdentityProvider(Microsoft.AspNetCore.Authentication.OpenIdConnect.RedirectContext context) { }
+    }
+    public class DefaultSilentLoginCallbackService : Duende.Bff.Endpoints.IBffEndpointService, Duende.Bff.Endpoints.SilentLogin.ISilentLoginCallbackService
+    {
+        protected readonly Microsoft.Extensions.Logging.ILogger Logger;
+        protected readonly Duende.Bff.Configuration.BffOptions Options;
+        public DefaultSilentLoginCallbackService(Microsoft.Extensions.Options.IOptions<Duende.Bff.Configuration.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Endpoints.SilentLogin.DefaultSilentLoginCallbackService> logger) { }
+        public virtual System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
+    [System.Obsolete("This endpoint will be removed in a future version. Use /login?prompt=create")]
+    public class DefaultSilentLoginService : Duende.Bff.Endpoints.IBffEndpointService, Duende.Bff.Endpoints.SilentLogin.ISilentLoginService
+    {
+        protected readonly Duende.Bff.Configuration.BffOptions Options;
+        public DefaultSilentLoginService(Microsoft.Extensions.Options.IOptions<Duende.Bff.Configuration.BffOptions> options, Microsoft.Extensions.Logging.ILogger<Duende.Bff.Endpoints.SilentLogin.DefaultSilentLoginService> logger) { }
+        public virtual System.Threading.Tasks.Task ProcessRequestAsync(Microsoft.AspNetCore.Http.HttpContext context) { }
+    }
+    public interface ISilentLoginCallbackService : Duende.Bff.Endpoints.IBffEndpointService { }
+    public interface ISilentLoginService : Duende.Bff.Endpoints.IBffEndpointService { }
+    public class PostConfigureOidcOptionsForSilentLogin : Microsoft.Extensions.Options.IPostConfigureOptions<Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions>
+    {
+        public PostConfigureOidcOptionsForSilentLogin(Microsoft.Extensions.Options.IOptions<Duende.Bff.Configuration.BffOptions> bffOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions> options, Microsoft.Extensions.Logging.ILoggerFactory logger) { }
+        public void PostConfigure(string? name, Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions options) { }
+    }
+}
+namespace Duende.Bff.Internal
+{
+    public sealed class BffMetrics
+    {
+        public const string MeterName = "Duende.Bff";
+        public BffMetrics(System.Diagnostics.Metrics.IMeterFactory meterFactory) { }
+        public void SessionEnded() { }
+        public void SessionStarted() { }
+        public void SessionsEnded(int count) { }
+    }
+}
+namespace Duende.Bff.SessionManagement.Revocation
+{
+    public interface ISessionRevocationService
+    {
+        System.Threading.Tasks.Task RevokeSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public class NopSessionRevocationService : Duende.Bff.SessionManagement.Revocation.ISessionRevocationService
+    {
+        public NopSessionRevocationService(Microsoft.Extensions.Logging.ILogger<Duende.Bff.SessionManagement.Revocation.NopSessionRevocationService> logger) { }
+        public System.Threading.Tasks.Task RevokeSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+}
+namespace Duende.Bff.SessionManagement.SessionStore
+{
+    public interface IUserSessionStore
+    {
+        System.Threading.Tasks.Task CreateUserSessionAsync(Duende.Bff.SessionManagement.SessionStore.UserSession session, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task DeleteUserSessionAsync(string key, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task DeleteUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<Duende.Bff.SessionManagement.SessionStore.UserSession?> GetUserSessionAsync(string key, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Duende.Bff.SessionManagement.SessionStore.UserSession>> GetUserSessionsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task UpdateUserSessionAsync(string key, Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate session, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface IUserSessionStoreCleanup
+    {
+        System.Threading.Tasks.Task<int> DeleteExpiredSessionsAsync(System.Threading.CancellationToken cancellationToken = default);
+    }
+    public class UserSession : Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate
+    {
+        public UserSession() { }
+        public string Key { get; set; }
+        public Duende.Bff.SessionManagement.SessionStore.UserSession Clone() { }
+        public void CopyTo(Duende.Bff.SessionManagement.SessionStore.UserSession other) { }
+    }
+    public class UserSessionUpdate
+    {
+        public UserSessionUpdate() { }
+        public System.DateTime Created { get; set; }
+        public System.DateTime? Expires { get; set; }
+        public System.DateTime Renewed { get; set; }
+        public string? SessionId { get; set; }
+        public string SubjectId { get; set; }
+        public string Ticket { get; set; }
+        public void CopyTo(Duende.Bff.SessionManagement.SessionStore.UserSessionUpdate other) { }
+    }
+    public class UserSessionsFilter
+    {
+        public UserSessionsFilter() { }
+        public string? SessionId { get; set; }
+        public string? SubjectId { get; init; }
+        public void Validate() { }
+    }
+}
+namespace Duende.Bff.SessionManagement.TicketStore
+{
+    public interface IServerTicketStore : Microsoft.AspNetCore.Authentication.Cookies.ITicketStore
+    {
+        System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyCollection<Microsoft.AspNetCore.Authentication.AuthenticationTicket>> GetUserTicketsAsync(Duende.Bff.SessionManagement.SessionStore.UserSessionsFilter filter, System.Threading.CancellationToken cancellationToken = default);
+    }
+}
