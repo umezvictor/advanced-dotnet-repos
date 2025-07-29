@@ -2,7 +2,7 @@ name: Staleness
 on:
   workflow_dispatch:
   schedule: # Run once a day at 5.23am (arbitrary but should avoid peak loads on the hour)
-    - cron: "23 5 * * *"
+    
 
 jobs:
   stale:
